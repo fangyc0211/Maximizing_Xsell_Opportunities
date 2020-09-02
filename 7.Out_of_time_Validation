@@ -1,0 +1,111 @@
+/*=============================================OUT OF TIME VALIDATION==============================================*/
+/*Include significant variables only*/
+proc sql;
+create table y.as_xsell_to_term_april as
+select target_hasTerm, unique_customer_id, 
+has_email,
+cert_channel_InPhone_count,
+cert_channel_Internet_count,
+cert_channel_OutPhone_count,
+active_ADI_cert_count,
+paymode_CC_cert_count,
+paymode_PAC_cert_count,
+min_age_at_contract
+from y.as_xsell_to_term_data_out;
+run;
+
+
+data y.as_xsell_to_term_april_1;
+set y.as_xsell_to_term_april;
+
+if has_email = . then has_email_sort = 1;
+else if has_email = 0 then has_email_sort = 2;
+else has_email_sort=3;
+
+
+if cert_channel_InPhone_count=. then cert_channel_InPhone_count_sort=1;
+else if cert_channel_InPhone_count=0 then cert_channel_InPhone_count_sort=2;
+else cert_channel_InPhone_count_sort=3;
+
+
+if cert_channel_Internet_count=. then cert_channel_Internet_count_sort=1;
+else if cert_channel_Internet_count=0 then cert_channel_Internet_count_sort=2;
+else cert_channel_Internet_count_sort=3;
+
+
+if cert_channel_OutPhone_count=. then cert_channel_OutPhone_count_sort=1;
+else if cert_channel_OutPhone_count=0 then cert_channel_OutPhone_count_sort=2;
+else if cert_channel_OutPhone_count=1 then cert_channel_OutPhone_count_sort=3;
+else cert_channel_OutPhone_count_sort=4;
+
+
+
+if active_ADI_cert_count=. then active_ADI_cert_count_sort=1;
+else if active_ADI_cert_count=0 then active_ADI_cert_count_sort=2;
+else active_ADI_cert_count_sort=3;
+
+if paymode_CC_cert_count=. then paymode_CC_cert_count_sort=1;
+else if paymode_CC_cert_count=0 then paymode_CC_cert_count_sort=2;
+else paymode_CC_cert_count_sort=3;
+
+if paymode_PAC_cert_count=. then paymode_PAC_cert_count_sort=1;
+else if paymode_PAC_cert_count=0 then paymode_PAC_cert_count_sort=2;
+else if paymode_PAC_cert_count=1 then paymode_PAC_cert_count_sort=3;
+else paymode_PAC_cert_count_sort=4;
+
+
+if min_age_at_contract=. then min_age_at_contract_sort=1;
+else if min_age_at_contract <=20 then min_age_at_contract_sort=2;
+else if min_age_at_contract <=25 then min_age_at_contract_sort=3;
+else if min_age_at_contract <=30 then min_age_at_contract_sort=4;
+else if min_age_at_contract <=35 then min_age_at_contract_sort=5;
+else if min_age_at_contract <=40 then min_age_at_contract_sort=6;
+else if min_age_at_contract <=45 then min_age_at_contract_sort=7;
+else if min_age_at_contract <=50 then min_age_at_contract_sort=8;
+else if min_age_at_contract <=55 then min_age_at_contract_sort=9;
+else min_age_at_contract_sort=10;
+
+
+run;
+
+
+
+%let try_model=y.as_xsell_to_term_april_1;
+%let ivout=y.as_xsell_to_term_outvalid_iv;
+%let woeout=y.as_xsell_to_term_outvalid_woe;
+
+%woeiv;
+
+%let woedataset  = y.as_xsell_to_term_outvalid_woe;
+%let metadataset = y.as_xsell_to_term_april_1;
+
+%woeinput(has_email);
+%woeinput(cert_channel_InPhone_count);
+%woeinput(cert_channel_Internet_count);
+%woeinput(cert_channel_OutPhone_count);
+%woeinput(active_ADI_cert_count);
+%woeinput(paymode_CC_cert_count);
+%woeinput(paymode_PAC_cert_count);
+%woeinput(min_age_at_contract);
+
+
+
+
+ods graphics on;
+
+Proc logistic data=y.as_xsell_to_term_april_1 descending plots=roc inest=y.as_xsell_to_term_model_params;
+model target_hasTerm(event='1')=
+	has_email_woe
+	cert_channel_InPhone_count_woe
+	cert_channel_Internet_count_woe
+	cert_channel_OutPhone_count_woe
+	active_ADI_cert_count_woe
+	paymode_CC_cert_count_woe
+	paymode_PAC_cert_count_woe
+	min_age_at_contract_woe
+
+	/maxiter=0;
+	output out=y.as_xsell_to_term_pred_april p=P_1;
+	roc;roccontrast;
+run;
+ods graphics off;
