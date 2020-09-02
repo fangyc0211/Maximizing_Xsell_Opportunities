@@ -1,0 +1,33 @@
+/*=====================================Population Stability Index=================================*/
+proc rank data=y.as_xsell_to_term_test_pred_feb descending groups=10 out=y.as_xsell_to_term_feb_decile;
+var P_1;
+ranks decile;
+run;
+
+proc sql;
+create table feb_count as
+select  decile,  count(*) as feb_Count
+from y.as_xsell_to_term_feb_decile
+group by decile;
+run;
+
+proc sql;
+create table april_count as 
+select  decile,  count(*) as april_Count
+from y.as_xsell_to_term_april_decile 
+group by decile;
+run;
+
+
+proc sql;
+create table y.as_xsell_to_term_PSI as
+select a.decile, 
+april_count/sum(april_count) as Out_of_time_pct, 
+feb_count/sum(feb_count) as In_time_pct,
+(Calculated Out_of_time_pct - Calculated In_time_pct) as pct_diff,
+log(calculated Out_of_time_pct / calculated In_time_pct) as ln,
+calculated pct_diff * calculated ln as PSI
+from feb_count a
+left join april_count b
+on a.decile = b.decile;
+run;
