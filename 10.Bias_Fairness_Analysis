@@ -1,0 +1,34 @@
+/*===========================================Bias and Fairness Analysis====================================*/
+proc freq data=y.as_xsell_to_term_april_top30;
+tables gender age_group_current min_age_at_contract;
+run;
+
+proc sql;
+create table y.as_xsell_to_term_groundtruth as
+select 
+	b.target_hasTerm,
+	b.unique_customer_id,
+	b.gender,
+	b.age_group_current, 
+
+	case when b.min_age_at_contract <=20 then '<=20'
+		when b.min_age_at_contract > 20 and b.min_age_at_contract <=25 then '21-25'
+		when b.min_age_at_contract > 25 and b.min_age_at_contract <=30 then '26-30'
+		when b.min_age_at_contract > 30 and b.min_age_at_contract <=35 then '31-35'
+		when b.min_age_at_contract > 35 and b.min_age_at_contract <=40 then '36-40'
+		when b.min_age_at_contract > 40 and b.min_age_at_contract <=45 then '41-45'
+		when b.min_age_at_contract > 45 and b.min_age_at_contract <=50 then '46-50'
+		when b.min_age_at_contract > 50 and b.min_age_at_contract <=55 then '51-55'
+		when b.min_age_at_contract > 55 and b.min_age_at_contract <=60 then '55-60'
+		else '60+'
+	end as min_age_at_contract
+
+from y.as_xsell_to_term_data_out b;
+run;
+
+
+proc freq data=y.as_xsell_to_term_groundtruth;
+tables gender age_group_current min_age_at_contract;
+run;
+
+
