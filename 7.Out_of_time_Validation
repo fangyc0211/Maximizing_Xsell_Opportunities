@@ -109,3 +109,18 @@ model target_hasTerm(event='1')=
 	roc;roccontrast;
 run;
 ods graphics off;
+
+
+
+/*----------------------------------------------LIFT Analysis-----------------------------------------*/
+proc rank data=y.as_xsell_to_term_pred_april descending groups=10 out=y.as_xsell_to_term_april_decile;
+var P_1;
+ranks decile;
+run;
+
+/*Lift Table*/
+proc tabulate data= y.as_xsell_to_term_april_decile;
+class decile;
+var target_hasTerm;
+TABLE decile=" " all, target_hasTerm*(N="Count" SUM="Number of Responses" COLPCTSUM="% of events") / box="Decile";
+RUN;
