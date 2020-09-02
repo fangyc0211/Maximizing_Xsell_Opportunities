@@ -1,0 +1,44 @@
+/*===================================Descriptive Statistical Analysis====================================*/ 
+/* ------------------------------------"In-time" Dataset - Feb 2020-------------------------------------*/
+
+proc contents data=y.as_xsell_to_term_data;
+run;
+
+proc means data=y.as_xsell_to_term_data N Nmiss min max mean median std;
+run;
+
+ods graphics on;
+/*Demographic analysis*/
+proc freq data=y.as_xsell_to_term_data nlevels;
+tables target_hasTerm / plots= freqplot (scale = Percent orient=vertical);
+tables age_group_current / plots= freqplot (scale = Percent orient=vertical);
+tables gender / plots= freqplot (scale = Percent orient=vertical);
+tables first_cert_channel / plots= freqplot (scale = Percent orient=vertical);
+tables province / plots= freqplot (scale = Percent orient=vertical);
+tables region / plots= freqplot (scale = Percent orient=vertical);
+tables has_email / plots= freqplot (scale = Percent orient=vertical);
+run;
+
+/*Number of products owned analysis*/
+proc freq data=y.as_xsell_to_term_data;
+tables active_auth_as_cert_count / plots= freqplot (scale = Percent orient=vertical);
+tables active_AD_cert_count / plots= freqplot (scale = Percent orient=vertical);
+tables active_ADI_cert_count / plots= freqplot (scale = Percent orient=vertical);
+tables active_CARP_cert_count / plots= freqplot (scale = Percent orient=vertical);
+run;
+
+
+/*Channel analysis*/
+proc freq data=y.as_xsell_to_term_data;
+tables cert_channel_InPhone_count / plots= freqplot (scale = Percent orient=vertical);
+tables cert_channel_Internet_count / plots= freqplot (scale = Percent orient=vertical);
+tables cert_channel_OutPhone_count / plots= freqplot (scale = Percent orient=vertical);
+run;
+
+
+/*Paymode analysis*/
+proc freq data=y.as_xsell_to_term_data;
+tables paymode_CC_cert_count/ plots= freqplot (scale = Percent orient=vertical);
+tables paymode_PAC_cert_count/ plots= freqplot (scale = Percent orient=vertical);
+tables paymode_ULOC_cert_count / plots= freqplot (scale = Percent orient=vertical);
+run;
