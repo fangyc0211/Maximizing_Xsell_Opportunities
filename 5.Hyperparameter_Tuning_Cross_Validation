@@ -1,0 +1,73 @@
+/*=============================================In-time Train Test Split==============================================*/
+
+proc surveyselect data=y.as_xsell_to_term_feb_1 seed=751223862 rat=0.7 
+out= data_select outall 
+method=srs; 
+run;
+
+
+data y.as_xsell_to_term_feb_train y.as_xsell_to_term_feb_test; 
+set data_select; 
+if selected =1 then output y.as_xsell_to_term_feb_train; 
+else output y.as_xsell_to_term_feb_test; 
+run;
+
+
+
+
+/*=============================================Hyperparameter tuning & Cross-validation==============================================*/
+/*5-fold cross validation to find best performing hyperparameters and to avoid overfitting for "In-time" dataset.*/
+
+%let varcount=17;
+%let x1=has_email_sort;
+%let x2=cert_channel_InPhone_count_sort;
+%let x3=cert_channel_Internet_count_sort;
+%let x4=cert_channel_OutPhone_count_sort;
+%let x5=active_auth_as_cert_count_sort;
+%let x6=active_AD_cert_count_sort;
+%let x7=active_ADI_cert_count_sort;
+%let x8=active_CARP_cert_count_sort;
+%let x9=paymode_CC_cert_count_sort;
+%let x10=paymode_PAC_cert_count_sort;
+%let x11=paymode_ULOC_cert_count_sort;
+%let x12=lapsed_cert_count_sort;
+%let x13=sum_cert_annualizedpremium_sort;
+%let x14=terminated_cov_count_sort;
+%let x15=min_age_at_contract_sort;
+%let x16=min_years_since_purchase_sort;
+%let x17=max_face_amount_sort;
+
+%let target=target_hasTerm;
+%let woe=_woe;
+%let sort=_sort;
+
+
+%k_fold_woe(dsn=y.as_xsell_to_term_feb_train, k=5, seed=12345);
+%k_fold_woeinput(k=5);
+
+
+/*0.8140*/
+%k_fold_cv(k=5,method=stepwise, ridging=relative);
+/*0.8140*/
+%k_fold_cv(k=5,method=stepwise, ridging=none);
+/*NA*/
+%k_fold_cv(k=5,method=stepwise, ridging=absolute);
+
+
+
+
+/*0.8144*/
+%k_fold_cv(k=5,method=backward, ridging=relative);
+/*0.8144*/
+%k_fold_cv(k=5,method=backward, ridging=none);
+/*0.7249*/
+%k_fold_cv(k=5,method=backward, ridging=absolute);
+
+
+
+/*0.8070*/
+%k_fold_cv(k=5,method=forward, ridging=relative);
+/*0.8070*/
+%k_fold_cv(k=5,method=forward, ridging=none);
+/*NA*/
+%k_fold_cv(k=5,method=forward, ridging=absolute);
