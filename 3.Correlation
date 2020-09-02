@@ -1,0 +1,42 @@
+/*===================================Correlation Analysis====================================*/ 
+proc corr data = y.as_xsell_to_term_data outp=y.as_xsell_to_term_Corr;
+	var 
+	target_hasTerm 
+
+	cert_channel_InPhone_count
+	cert_channel_Internet_count
+	cert_channel_OutPhone_count
+
+	cert_count
+	product_count
+	active_auth_as_cert_count
+
+	active_AD_cert_count	
+	active_ADI_cert_count	
+	active_CARP_cert_count
+
+	active_child_rider_count
+	paymode_CC_cert_count	
+	paymode_PAC_cert_count
+	paymode_ULOC_cert_count	
+	lapsed_cert_count
+	active_cert_cov_count
+	sum_cert_annualizedpremium
+	primary_cov_count
+	joint_cov_count
+	AD_rider_count
+	active_joint_cov_count
+	active_AD_rider_count
+	terminated_cov_count
+	active_as_cov_count
+	years_cov_active
+	min_issueage
+	max_issueage
+	min_age_at_contract
+	max_age_at_contract
+	min_years_since_purchase
+	max_years_since_purchase
+ 	max_face_amount
+	max_annualizedpremium
+	;	
+run;
