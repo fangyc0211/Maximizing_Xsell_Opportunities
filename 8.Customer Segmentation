@@ -1,0 +1,160 @@
+proc sql;
+create table y.as_xsell_to_term_april_top30 as
+select 
+	a.decile,
+	a.target_hasTerm,
+	a.unique_customer_id,
+	b.gender,
+	b.province,
+	b.age_current,
+	b.age_group_current, 
+	b.has_email,
+	b.first_cert_channel,
+	case when b.active_AD_cert_count = 0 and b.active_ADI_cert_count = 0 and b.active_CARP_cert_count > 0 then 1 else 0 end as has_carp,
+	case when b.active_AD_cert_count > 0 and b.active_ADI_cert_count = 0 and b.active_CARP_cert_count = 0 then 1 else 0 end as has_ad,
+	case when b.active_AD_cert_count = 0 and b.active_ADI_cert_count > 0 and b.active_CARP_cert_count = 0 then 1 else 0 end as has_adi,
+	case when b.active_AD_cert_count > 0 and b.active_ADI_cert_count > 0 and b.active_CARP_cert_count = 0 then 1 else 0 end as has_ad_adi,
+	case when b.active_AD_cert_count > 0 and b.active_ADI_cert_count = 0 and b.active_CARP_cert_count > 0 then 1 else 0 end as has_ad_carp,
+	case when b.active_AD_cert_count = 0 and b.active_ADI_cert_count > 0 and b.active_CARP_cert_count > 0 then 1 else 0 end as has_adi_carp,
+	case when b.active_AD_cert_count > 0 and b.active_ADI_cert_count > 0 and b.active_CARP_cert_count > 0 then 1 else 0 end as has_all,
+
+	case when b.min_age_at_contract <=20 then '<=20'
+		when b.min_age_at_contract > 20 and b.min_age_at_contract <=25 then '21-25'
+		when b.min_age_at_contract > 25 and b.min_age_at_contract <=30 then '26-30'
+		when b.min_age_at_contract > 30 and b.min_age_at_contract <=35 then '31-35'
+		when b.min_age_at_contract > 35 and b.min_age_at_contract <=40 then '36-40'
+		when b.min_age_at_contract > 40 and b.min_age_at_contract <=45 then '41-45'
+		when b.min_age_at_contract > 45 and b.min_age_at_contract <=50 then '46-50'
+		when b.min_age_at_contract > 50 and b.min_age_at_contract <=55 then '51-55'
+		when b.min_age_at_contract > 55 and b.min_age_at_contract <=60 then '55-60'
+		else '60+'
+	end as min_age_at_contract,
+
+	case when b.max_face_amount <= 100000 then '<=100000'
+		when b.max_face_amount > 100000 and b.max_face_amount <= 150000 then '100000-150000'
+	else '>150000'
+	end as max_face_amount
+
+
+from y.as_xsell_to_term_april_decile a
+left join y.as_xsell_to_term_data_out b on a.unique_customer_id = b.unique_customer_id 
+where a.decile <=2;
+run;
+
+
+proc freq data=y.as_xsell_to_term_april_top30;
+tables target_hasTerm*decile;
+run;
+
+
+
+
+
+proc freq data= y.as_xsell_to_term_april_top30;
+tables 
+gender
+province
+age_group_current
+has_email
+first_cert_channel
+min_age_at_contract
+max_face_amount
+has_carp
+has_ad
+has_adi
+has_adi_carp
+has_ad_adi
+has_ad_carp
+has_all;
+run;
+
+
+
+
+
+proc sql;
+select decile, gender, count(*) as count
+from y.as_xsell_to_term_april_top30
+group by decile, gender ;
+run;
+
+proc sql;
+select decile, province, count(*) as count
+from y.as_xsell_to_term_april_top30
+group by decile, province ;
+run;
+
+
+proc sql;
+select decile, age_group_current, count(*) as count
+from y.as_xsell_to_term_april_top30
+group by decile, age_group_current ;
+run;
+
+proc sql;
+select decile, has_email, count(*) as count
+from y.as_xsell_to_term_april_top30
+group by decile, has_email ;
+run;
+
+
+proc sql;
+select decile, first_cert_channel, count(*) as count
+from y.as_xsell_to_term_april_top30
+group by decile, first_cert_channel ;
+run;
+
+
+proc sql;
+select decile, min_age_at_contract, count(*) as count
+from y.as_xsell_to_term_april_top30
+group by decile, min_age_at_contract ;
+run;
+
+proc sql;
+select decile, max_face_amount, count(*) as count
+from y.as_xsell_to_term_april_top30
+group by decile, max_face_amount ;
+run;
+
+proc sql;
+select decile, has_carp, count(*) as count
+from y.as_xsell_to_term_april_top30
+group by decile, has_carp ;
+run;
+
+proc sql;
+select decile, has_ad, count(*) as count
+from y.as_xsell_to_term_april_top30
+group by decile, has_ad ;
+run;
+
+proc sql;
+select decile, has_adi, count(*) as count
+from y.as_xsell_to_term_april_top30
+group by decile, has_adi ;
+run;
+
+proc sql;
+select decile, has_adi_carp, count(*) as count
+from y.as_xsell_to_term_april_top30
+group by decile, has_adi_carp ;
+run;
+
+proc sql;
+select decile, has_ad_adi, count(*) as count
+from y.as_xsell_to_term_april_top30
+group by decile, has_ad_adi ;
+run;
+
+proc sql;
+select decile, has_ad_carp, count(*) as count
+from y.as_xsell_to_term_april_top30
+group by decile, has_ad_carp ;
+run;
+
+proc sql;
+select decile, has_all, count(*) as count
+from y.as_xsell_to_term_april_top30
+group by decile, has_all ;
+run;
