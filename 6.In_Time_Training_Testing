@@ -1,0 +1,133 @@
+/*==========================================="In-time" Training==============================================*/
+%let varcount=17;
+%let x1=has_email_sort;
+%let x2=cert_channel_InPhone_count_sort;
+%let x3=cert_channel_Internet_count_sort;
+%let x4=cert_channel_OutPhone_count_sort;
+%let x5=active_auth_as_cert_count_sort;
+%let x6=active_AD_cert_count_sort;
+%let x7=active_ADI_cert_count_sort;
+%let x8=active_CARP_cert_count_sort;
+%let x9=paymode_CC_cert_count_sort;
+%let x10=paymode_PAC_cert_count_sort;
+%let x11=paymode_ULOC_cert_count_sort;
+%let x12=lapsed_cert_count_sort;
+%let x13=sum_cert_annualizedpremium_sort;
+%let x14=terminated_cov_count_sort;
+%let x15=min_age_at_contract_sort;
+%let x16=min_years_since_purchase_sort;
+%let x17=max_face_amount_sort;
+
+%let target=target_hasTerm;
+%let woe=_woe;
+%let sort=_sort;
+
+
+%let try_model=y.as_xsell_to_term_feb_train;
+%let ivout=y.as_xsell_to_term_train_iv;
+%let woeout=y.as_xsell_to_term_train_woe;
+
+
+%woeiv;
+
+
+
+%let woedataset  = y.as_xsell_to_term_train_woe;
+%let metadataset = y.as_xsell_to_term_feb_train;
+
+
+/*Remove variables where IV<0.02*/
+%woeinput(has_email);
+%woeinput(cert_channel_InPhone_count);
+%woeinput(cert_channel_Internet_count);
+%woeinput(cert_channel_OutPhone_count);
+%woeinput(active_auth_as_cert_count);
+%woeinput(active_ADI_cert_count);
+%woeinput(paymode_CC_cert_count);
+%woeinput(paymode_PAC_cert_count);
+%woeinput(terminated_cov_count);
+%woeinput(min_years_since_purchase);
+%woeinput(min_age_at_contract);
+%woeinput(max_face_amount);
+
+
+
+
+ods graphics on;
+
+Proc logistic data=y.as_xsell_to_term_feb_train descending plots=roc outest=y.as_xsell_to_term_model_params;
+model target_hasTerm(event='1')=
+	has_email_woe
+	cert_channel_InPhone_count_woe
+	cert_channel_Internet_count_woe
+	cert_channel_OutPhone_count_woe
+	active_auth_as_cert_count_woe
+	active_ADI_cert_count_woe
+	paymode_CC_cert_count_woe
+	paymode_PAC_cert_count_woe
+	terminated_cov_count_woe
+	min_age_at_contract_woe
+	min_years_since_purchase_woe
+	max_face_amount_woe
+
+
+	/selection=backward
+	ridging=relative
+	slentry=0.05
+	slstay=0.05
+	stb;
+	output out=y.as_xsell_to_term_train_pred_feb p=P_1;
+	roc;roccontrast;
+run;
+ods graphics off;
+
+
+
+
+
+
+
+/*============================================="In-time" TESTING==============================================*/
+%let try_model=y.as_xsell_to_term_feb_test;
+%let ivout=y.as_xsell_to_term_test_iv;
+%let woeout=y.as_xsell_to_term_test_woe;
+
+%woeiv;
+
+%let woedataset  = y.as_xsell_to_term_test_woe;
+%let metadataset = y.as_xsell_to_term_feb_test;
+
+/*Include significant variables*/
+%woeinput(has_email);
+%woeinput(cert_channel_InPhone_count);
+%woeinput(cert_channel_Internet_count);
+%woeinput(cert_channel_OutPhone_count);
+%woeinput(active_ADI_cert_count);
+%woeinput(paymode_CC_cert_count);
+%woeinput(paymode_PAC_cert_count);
+%woeinput(min_age_at_contract);
+
+
+
+
+
+ods graphics on;
+
+Proc logistic data=y.as_xsell_to_term_feb_test descending plots=roc inest=y.as_xsell_to_term_model_params;
+model target_hasTerm(event='1')=
+	has_email_woe
+	cert_channel_InPhone_count_woe
+	cert_channel_Internet_count_woe
+	cert_channel_OutPhone_count_woe
+	active_ADI_cert_count_woe
+	paymode_CC_cert_count_woe
+	paymode_PAC_cert_count_woe
+	min_age_at_contract_woe
+	
+
+
+	/maxiter=0;
+	output out=y.as_xsell_to_term_test_pred_feb p=P_1;
+	roc;roccontrast;
+run;
+ods graphics off;
