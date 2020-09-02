@@ -1,0 +1,45 @@
+/*===========================================Permutation Feature Importance====================================*/
+
+proc sql;
+create table y.as_xsell_to_term_pfi_out as
+select target_hasTerm, unique_customer_id,
+	has_email_woe,
+	cert_channel_InPhone_count_woe,
+	cert_channel_Internet_count_woe,
+	cert_channel_OutPhone_count_woe,
+	active_ADI_cert_count_woe,
+	paymode_CC_cert_count_woe,
+	paymode_PAC_cert_count_woe,
+	min_age_at_contract_woe
+from y.as_xsell_to_term_april_1;
+run;
+
+proc contents data=y.as_xsell_to_term_pfi_out out=y.as_xsell_to_term_pfi_out_1(keep=name varnum);
+run;
+
+proc sort data=y.as_xsell_to_term_pfi_out_1;
+by varnum;
+run;
+
+
+%let pfi_dsn = y.as_xsell_to_term_pfi_out;
+%let varnumlist = y.as_xsell_to_term_pfi_out_1;
+%let seed1 = 12345;
+%let seed2 = 54321;
+%let woe = _woe;
+
+%let pfi_vcount = 8;
+%let v1 = has_email;
+%let v2 = cert_channel_InPhone_count;
+%let v3 = cert_channel_Internet_count;
+%let v4 = cert_channel_OutPhone_count;
+%let v5 = active_ADI_cert_count;
+%let v6 = paymode_CC_cert_count;
+%let v7 = paymode_PAC_cert_count;
+%let v8 = min_age_at_contract;
+%let ov_pred = y.as_xsell_to_term_april_decile;
+
+%pfi_dataset_loop
+%compute_pfi_loop
+
+
