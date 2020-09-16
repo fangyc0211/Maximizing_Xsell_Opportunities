@@ -4,4 +4,4 @@ In the increasingly competitive environment for banks and credit unions, every p
 This project shows a step-by-step approach to maximize cross-sell opportunities among our customer. We first prepare the data for a statistical analysis. With some predictive analytics technqiues, we can then identify those customers who have the highest chance of buying a financial product. 
 
 
-This project is written in SAS Enterprise Guide. The methodology used is Logistic Regression with WOE transformation
+This project is written in SAS Enterprise Guide. The methodology used is Logistic Regression with WOE transformation. Information Value (IV) and Permutation Feature Importance are used to rank the predicting power of predictors. 
